@@ -21,3 +21,6 @@ footer{max-width:1180px;padding:25px 0 32px;font-size:10px;color:#8a939f;border-
 .sign-settings{margin:0 0 22px;padding:20px;border:1px solid #d9dee7;border-radius:14px;background:#f7f8fa}.sign-settings select,.sign-settings input{width:100%;margin-bottom:12px}.sign-settings p{font-size:13px;line-height:1.6;color:#43516a;overflow-wrap:anywhere}.sign-settings button{margin:8px 0}.camera-panel #detection-readout{overflow-wrap:anywhere}
 
 .mirror-control{display:flex;align-items:center;gap:8px}.sign-settings .mirror-control input{width:auto;margin:0}.camera-guide{inset:15%}.camera-frame video{object-fit:contain}
+
+/* Pairing details: touch-friendly copy controls, with room for narrow phones. */
+.pairing-field{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}.pairing-field input{flex:1 1 150px;min-width:0;width:auto}.pairing-field .button{min-height:44px;white-space:nowrap;flex:0 0 auto}.pairing-token-field input{flex-basis:100%}.pairing-copy-status{font-size:12px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}.pairing-copy-status:empty{display:none}.clipboard-helper{position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;opacity:.01;font-size:16px}@media(max-width:480px){.pairing-field input{font-size:16px}.pairing-token-field .button{flex:1 1 auto}}
