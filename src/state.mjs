@@ -6,6 +6,7 @@ export const MIN_SAMPLE_GAP_MS = 8_000;
 export const MAX_SAMPLE_GAP_MS = 25_000;
 export const MIN_CONFIDENCE = 0.85;
 export const MAX_OVERRIDE_MS = 2 * 60 * 60 * 1000;
+export const HISTORY_LIMIT = 200;
 
 function time(value) {
   if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value;
@@ -26,7 +27,20 @@ function cleanReason(value, fallback) {
     : fallback;
 }
 function history(state, change) {
-  return [...state.history, change].slice(-20);
+  return [...state.history, change].sort((a,b)=>a.at-b.at).slice(-HISTORY_LIMIT);
+}
+
+/** Persist timed events once, including when no operator is connected. */
+export function settleHistory(state, now) {
+  const at=clock(now);let next=state;
+  if(state.override && state.override.expiresAt<=at){
+    const o=state.override;
+    next={...next,override:null,history:history(next,{status:o.kind==='break'?'BREAK_ENDED':'OVERRIDE_EXPIRED',source:'owner',at:o.expiresAt,reason:'Selected duration elapsed.'})};
+  }
+  if(state.lastSeenAt!==null&&at-state.lastSeenAt>=STALE_MS&&(state.staleLoggedAt??-1)<state.lastSeenAt){
+    next={...next,staleLoggedAt:state.lastSeenAt,history:history(next,{status:'FEED_UNAVAILABLE',source:state.source,at:state.lastSeenAt+STALE_MS,reason:'No fresh observation for 35 seconds.'})};
+  }
+  return next;
 }
 
 export function initialState(now) {
@@ -68,6 +82,7 @@ export function observe(state, observation, now) {
     reason: cleanReason(observation.reason, confident ? 'Designated indicator observed.' : 'Observation is uncertain.'),
   };
   if (!confident || receivedAt - seenAt >= STALE_MS) {
+    if(previous.latestStatus!=='UNCERTAIN')next={...next,history:history(next,{status:'UNCERTAIN',source:next.source,at:seenAt,reason:next.reason})};
     return { ...next, candidate: null, count: 0, lastCountedAt: null };
   }
   const gap = previous.lastCountedAt === null ? null : seenAt - previous.lastCountedAt;
@@ -79,7 +94,7 @@ export function observe(state, observation, now) {
   if (next.count >= REQUIRED_MATCHES && next.confirmed !== status) {
     next = {
       ...next, confirmed: status, lastConfirmedAt: seenAt,
-      history: history(next, { status, source: next.source, at: seenAt }),
+      history: history(next, { status, source: next.source, at: seenAt, reason:next.reason }),
     };
   }
   return next;
@@ -101,7 +116,7 @@ export function setOverride(state, override, now) {
   const reason = cleanReason(override.reason, 'Owner supplied a temporary status.');
   return {
     ...state, override: { status: override.status, kind, expiresAt, reason, setAt: at },
-    history: history(state, { status: override.status, kind, source: 'owner', at, expiresAt }),
+    history: history(state, { status: override.status, kind, source: 'owner', at, expiresAt, reason }),
   };
 }
 
@@ -110,7 +125,7 @@ export function clearOverride(state, now) {
   if (!state.override) return state;
   return {
     ...state, override: null,
-    history: history(state, { status: 'OVERRIDE_CLEARED', source: 'owner', at }),
+    history: history(state, { status: state.override.kind==='break'?'BREAK_ENDED':'OVERRIDE_CLEARED', source: 'owner', at, reason:'Ended by owner.' }),
   };
 }
 

@@ -1,4 +1,4 @@
-import {initialState,observe,publicStatus,setOverride,clearOverride} from './state.mjs';
+import {initialState,observe,publicStatus,setOverride,clearOverride,settleHistory,HISTORY_LIMIT} from './state.mjs';
 export const hash = async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'}});
 export async function api(request,db,now=Date.now()){
@@ -24,7 +24,9 @@ export async function api(request,db,now=Date.now()){
  }
  const match=path.match(/^\/api\/boards\/([a-f0-9-]{36})(?:\/(observe|override|clear|pair))?$/);if(!match)return json({error:'Not found.'},404);
  const row=await db.prepare('SELECT * FROM boards WHERE id=?').bind(match[1]).first();if(!row)return json({error:'Store not found.'},404);
- const state=JSON.parse(row.state),view=s=>({id:row.id,name:row.name,mode:row.mode,...publicStatus(s,now),history:s.history,serverTime:now});
+ let state=JSON.parse(row.state);const settled=settleHistory(state,now);
+ if(settled!==state){const saved=await db.prepare('UPDATE boards SET state=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(settled),row.id,row.revision).run();if(saved.meta.changes!==1)return json({error:'Another update arrived. Refresh and retry.'},409);state=settled;row.revision++;}
+ const view=s=>({id:row.id,name:row.name,mode:row.mode,...publicStatus(s,now),history:s.history,historyLimit:HISTORY_LIMIT,serverTime:now});
  if(request.method==='GET'&&!match[2])return json(view(state));
  if(request.method!=='POST'||!match[2])return json({error:'Not found.'},404);
  const token=request.headers.get('authorization')?.replace(/^Bearer /,'');if(!token||await hash(token)!==row.token_hash)return json({error:'Invalid pairing token.'},401);
