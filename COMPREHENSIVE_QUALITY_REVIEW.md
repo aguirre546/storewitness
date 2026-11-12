@@ -68,3 +68,9 @@ Start observing now performs first-use camera-board setup, camera access and tex
 Replay Lab is always reachable from navigation. Its empty state explains that no recordings or camera are required, and provides Create a replay board. Replay scenarios remain labelled test data and separate from camera observations.
 
 Verification: 58 StoreWitness tests pass and the Worker builds. A physical webcam CLOSE reading remains unverified; controlled sign-image results do not prove field accuracy. Browser UI verification is recorded separately after deployment.
+
+## Owner duration and break controls — 12 November 2026
+
+Owner controls offer 5, 15, 30 and 60 minutes, or a custom whole-minute duration from 1 to 120. The server validates the duration and calculates expiry from its own clock; older clients default to 15 minutes. On break creates an owner-attributed CLOSED override with a distinct break label, reason and expected return time on the public page. End break / clear override ends it early. Observations may continue while an override is active. At expiry or clearing, fresh observed status applies; stale observations show Unavailable rather than assuming reopening.
+
+Validation: 60 scoped tests pass. API tests cover preset/custom duration boundaries, invalid durations, exact expiry, public break attribution, camera updates while on break, clearing and invalid break combinations.
