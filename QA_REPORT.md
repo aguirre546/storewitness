@@ -49,3 +49,9 @@ Verification: 58 StoreWitness tests pass and the Worker builds. A physical webca
 Owner controls offer 5, 15, 30 and 60 minutes, or a custom whole-minute duration from 1 to 120. The server validates the duration and calculates expiry from its own clock; older clients default to 15 minutes. On break creates an owner-attributed CLOSED override with a distinct break label, reason and expected return time on the public page. End break / clear override ends it early. Observations may continue while an override is active. At expiry or clearing, fresh observed status applies; stale observations show Unavailable rather than assuming reopening.
 
 Validation: 60 scoped tests pass. API tests cover preset/custom duration boundaries, invalid durations, exact expiry, public break attribution, camera updates while on break, clearing and invalid break combinations.
+
+## Stored activity history — 12 November 2026
+
+Each existing board retains its latest 200 metadata events in Cloudflare D1, independent of browser tabs. The customer timeline shows ten events initially with Show more and JSON Download history. Events use consistent labels, source, reason and full Philippine date/time. Break endings, override expiry, uncertain transitions and stale feeds are recorded. Expiry/stale events are materialized once on the next API read or write, with their actual effective timestamp; no always-on background worker is claimed. Earlier discarded entries cannot be recovered. History belongs to the Store ID; reconnect the same store to continue its timeline. Creating another board creates a separate history. Latest-200 retention is bounded, not an unlimited archive. No video is saved.
+
+63 scoped tests pass, including reopen-storage persistence, chronological/idempotent expiry, uncertainty transitions and 200-event retention.
