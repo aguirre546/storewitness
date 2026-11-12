@@ -90,14 +90,18 @@ export function setOverride(state, override, now) {
   if (!override || !['OPEN', 'CLOSED'].includes(override.status)) {
     throw new TypeError('Owner status must be OPEN or CLOSED.');
   }
+  const kind = override.kind ?? 'status';
+  if (!['status', 'break'].includes(kind) || (kind === 'break' && override.status !== 'CLOSED')) {
+    throw new TypeError('A break must temporarily mark the store closed.');
+  }
   const expiresAt = time(override.expiresAt);
   if (expiresAt === null || expiresAt <= at || expiresAt > at + MAX_OVERRIDE_MS) {
     throw new RangeError('Owner override must expire within the next two hours.');
   }
   const reason = cleanReason(override.reason, 'Owner supplied a temporary status.');
   return {
-    ...state, override: { status: override.status, expiresAt, reason, setAt: at },
-    history: history(state, { status: override.status, source: 'owner', at, expiresAt }),
+    ...state, override: { status: override.status, kind, expiresAt, reason, setAt: at },
+    history: history(state, { status: override.status, kind, source: 'owner', at, expiresAt }),
   };
 }
 

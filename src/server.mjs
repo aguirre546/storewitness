@@ -34,7 +34,11 @@ export async function api(request,db,now=Date.now()){
    if(data.source!==row.mode||!['OPEN','CLOSED','UNCERTAIN'].includes(data.status)||typeof data.confidence!=='number'||!Number.isFinite(data.confidence)||data.confidence<0||data.confidence>1)return json({error:'Observation must match this board source.'},400);
    if(state.lastSeenAt!==null&&now-state.lastSeenAt<8000)return json({error:'Wait at least eight seconds between observations.'},429);
    next=observe(state,{status:data.status,confidence:data.confidence,source:row.mode,reason:String(data.reason??'').slice(0,160),observedAt:now},now);
-  }else if(match[2]==='override')next=setOverride(state,{status:data.status,reason:String(data.reason??'').slice(0,120),expiresAt:now+15*60000},now);
+  }else if(match[2]==='override'){
+   const minutes=data.durationMinutes===undefined?15:data.durationMinutes;
+   if(!Number.isInteger(minutes)||minutes<1||minutes>120)return json({error:'Choose a duration from 1 to 120 whole minutes.'},400);
+   next=setOverride(state,{status:data.status,kind:data.kind??'status',reason:String(data.reason??'').slice(0,120),expiresAt:now+minutes*60000},now);
+  }
   else next=clearOverride(state,now);
  }catch{return json({error:'Invalid status change.'},400);}
  const result=await db.prepare('UPDATE boards SET state=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(next),row.id,row.revision).run();
