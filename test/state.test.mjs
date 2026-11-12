@@ -95,8 +95,8 @@ test('overrides require valid status and expiration within two hours', () => {
 });
 test('history and counts stay bounded and state survives JSON round-trip', () => {
   let s = initialState(start);
-  for(let i=0; i<100; i++) s = sample(s, i*10, Math.floor(i/3)%2 ? 'CLOSED':'OPEN');
-  assert.equal(s.history.length,20); assert.ok(s.count<=3);
+  for(let i=0; i<1000; i++) s = sample(s, i*10, Math.floor(i/3)%2 ? 'CLOSED':'OPEN');
+  assert.equal(s.history.length,200); assert.ok(s.count<=3);
   assert.deepEqual(JSON.parse(JSON.stringify(s)),s);
 });
 test('bad inputs do not mutate state', () => {
