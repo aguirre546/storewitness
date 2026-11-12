@@ -1,4 +1,4 @@
-# Three-minute demo — Victor Aguirre / Victor Aguirre
+# Three-minute demo — StoreWitness by Victor Aguirre
 
 0:00–0:25 — Problem: a planned schedule does not always tell a customer what is happening now. StoreWitness shares a participating shop's latest observed indicator with visible freshness.
 
@@ -10,6 +10,7 @@
 
 1:35–2:10 — Explain: no further observations arrive, so freshness expires after 35 seconds. Show unavailable, rather than misleadingly closed. Apply an explicitly labelled owner override for an exceptional situation and clear it.
 
-2:10–2:40 — Show supplied printable markers and the operator/customer separation. Explain practical target users: small participating shops and people avoiding unnecessary trips. No measured pilot outcomes yet.
+2:10–2:40 — Open /inspect and demonstrate a clear CLOSED photo reading, brightness and supported objects; explain that the photo does not publish. Show the operator/customer separation. Explain practical target users: small participating shops and people avoiding unnecessary trips. No measured pilot outcomes yet.
 
 2:40–3:00 — Limits and next step: test actual storefront lighting and owner workflows; deploy shared storage, strengthen paired-device trust, then run a consented pilot. StoreWitness does not currently modify Google listings.
+

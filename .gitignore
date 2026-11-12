@@ -3,3 +3,4 @@ data/
 dist/
 .openai/*.tar.gz
 *.log
+pages-deploy/

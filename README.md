@@ -1,33 +1,49 @@
 # StoreWitness
-**Store status, backed by observation.** Built by Victor Aguirre, solo creator.
+**Store status, backed by observation.** By Victor Aguirre, solo creator.
 
-A community prototype for people who want to check a participating store's latest signal before travelling. The operator's browser recognizes the supplied coded OPEN/CLOSED indicators. A shared customer page shows source, freshness, confirmation progress and recent changes.
+Live: https://studio.victoraguirre.site/  
+Animated concept: https://studio.victoraguirre.site/demo  
+Experimental real image analysis: https://studio.victoraguirre.site/inspect
 
-## Run locally
-Requires Node.js 22.13 or newer (tested on Node 26). No packages or paid API keys are needed.
+A working community prototype that shares a participating store's latest observed status. It displays the source, confirmation progress, freshness and owner overrides. It does not update Google Maps.
 
-Open PowerShell in this directory and run `./Start-StoreWitness.ps1`, then visit http://127.0.0.1:4330 . Keep the terminal running. Local boards persist in `data/storewitness.sqlite`, which must not be committed. `node preview.mjs` without the script uses temporary storage for QA.
+## Try the demonstration
+1. Open Operator studio and create a **replay** store. This is clearly labelled demonstration data.
+2. Run OPEN replay. Three acknowledged observations ten seconds apart confirm the state after about twenty seconds.
+3. Copy the public status link and open it on another device. Public reads do not require the private pairing token.
+4. Stop observing. The signal becomes unavailable 35 seconds after the last observation.
+5. Test an owner override, which is labelled and expires after fifteen minutes.
 
-1. Open Operator studio. Choose a camera board or separate replay board, then Create a demo store.
-2. Expand Connect an existing store and securely save its Store ID and private pairing token. The token remains in tab memory, is not placed in the URL, and must be re-entered after reload. There is no token recovery in this prototype.
-3. For rehearsal, use a replay board and Run OPEN replay. Three checks, ten seconds apart, confirm OPEN after about twenty seconds. Replay data is always labelled.
-4. For a camera test, create a camera board, download a coded marker and print/display it on a second device. Enable camera, then Start observing. Use one complete, well-lit marker at least 56 pixels wide and approximately square in the frame. Generic text signs are not recognized.
-5. Copy status link and open it in another browser tab on this computer. Customer pages poll every three seconds. Localhost links do not work on another person's phone or computer; a public deployment is required for that.
-6. Stop observing and wait at least 35 seconds after the last observation. The public page becomes unavailable. Test an owner override and clear it; it is labelled and expires in fifteen minutes.
+## Real camera evidence
+Open `/inspect`, load models and choose an image or enable your webcam. TensorFlow.js COCO-SSD draws boxes for supported common objects, including people. Tesseract reads English OPEN/CLOSED text. Brightness and operator-entered timezone/hours add context. Select the center region for a close sign when whole-frame OCR misses it.
 
-## What is implemented
-Pixel-based coded-marker detection, three-reading confirmation, uncertainty, 35-second stale timeout, source isolation, timestamped history, expiring owner overrides, public read API, hashed pairing tokens, same-origin writes, bounded creation rate and optimistic concurrency. Camera frames remain on the operator device. The API accepts metadata only; it cannot remotely prove a paired device actually used a camera.
+Image processing runs locally. Model downloads require internet and reveal the requesting IP to public CDNs; frames are not uploaded. Enable sending only with a live webcam and a paired **camera** board. Uploaded images are single-frame inspection tests and cannot publish observations. The browser's camera permission is required. Automatic checks stop when the page becomes hidden.
 
-## Defined limits
-This does not update Google Maps or use Google Business Profile. No live CCTV/RTSP connector, arbitrary object detector, OCR, trained storefront model or unattended background camera is included. Observation stops when this tab becomes hidden; keep it foreground during a demonstration. Lighting, angle, glare and occlusion need real hardware tests. Unit tests use generated marker pixels; physical webcam accuracy is not yet measured. Owner participation, field testing and stronger device identity are required before community production use. A camera-status observation is not a guarantee staff can serve a customer.
+Darkness, a quiet scene, or no detected people **does not prove closure**. Contradictory or insufficient evidence remains uncertain. Object classes are limited; this is not an all-object detector, a trained shutter detector, dual-camera fusion, or RTSP CCTV ingestion. Schedules are configured and saved on the operator device; they are not extracted from a photograph or centrally managed.
 
-## Build and verification
-`node --test` runs detector, state and SQLite-backed API tests. `node build.mjs` creates an asset-embedded Cloudflare Worker in `dist/server/index.js`. D1 binding is `DB`; schema SQL and Drizzle migration journal are in `drizzle/`. Hosted D1 migration and production behavior must be verified after deployment. Local tests do not prove seven-day reliability.
+The original operator camera mode also supports the supplied coded OPEN/CLOSED markers. That marker mode is separate from experimental OCR.
 
-## Hosting status
-The earlier Sites registration is recorded in `.openai/hosting.json`. At this handoff the connected Sites account returns project-not-found for that exact registration, so this build is not claimed publicly deployed. Preserve that ID and reconnect the original hosting account before publishing. Do not replace it with an unrelated Site. The previous PurrFlow project remains separate.
+## Run and verify locally
+Requires Node.js 22.13+ with `node:sqlite` (tested on Node 26). There are no npm dependencies or paid API keys.
 
-Competition entry remains unsubmitted. Present only the working scope above; no claimed audience impact or accuracy percentage has been measured.
+```
+node --test
+node build.mjs
+node preview.mjs
+```
 
-## Animated CCTV explanation
-Visit http://127.0.0.1:4330/demo or choose Watch animated demo from the home page. An illustrated outside camera, inside indicator view and customer preview explain five stages with Play/Pause, Next step and Restart. Four scenarios show Open, Closed, Uncertain and Unavailable. This page is a concept simulation and does not access camera feeds or write board data. Two-camera fusion and shutter recognition remain proposed features.
+Visit http://127.0.0.1:4330 . For persistent local boards use `./Start-StoreWitness.ps1`; data stays in ignored `data/storewitness.sqlite`. Default preview uses temporary storage. Localhost links cannot be shared with another computer.
+
+## Deploy to Cloudflare Pages
+Run `node build-pages.mjs`. Upload the **contents** of `pages-deploy` (`_worker.js` and `index.html`) using Pages Direct Upload. Create a D1 database, execute `drizzle/0000_store_boards.sql`, and add the Pages binding named **DB**. Redeploy after setting the binding. Add a custom domain through Pages and verify its DNS record and HTTPS response. The live instance uses Cloudflare Pages and D1 on the free plan; free-plan limits still apply. Publishing source to GitHub does not automatically redeploy this Direct Upload project.
+
+## Safeguards and limits
+Pairing tokens are returned only at creation, hashed in storage, excluded from public reads, and never placed in URLs. Keep the token privately; there is no account-based recovery in this prototype. Writes validate origin, source and input, enforce sample spacing, and use optimistic revision checks. Board creation is bounded. Only metadata and recent status history reach D1. A paired sender can submit false metadata; authentication does not prove that camera evidence is genuine.
+
+This is an inspectable hackathon prototype, not a claim of production accuracy, seven-day reliability, or guaranteed opening/service. No real CCTV deployment or Google Business Profile integration has been validated. Competition submission remains a separate action.
+
+## Model references
+- TensorFlow.js: https://github.com/tensorflow/tfjs
+- COCO-SSD supported detection: https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+- Tesseract.js: https://github.com/naptha/tesseract.js
+- Cloudflare Direct Upload: https://developers.cloudflare.com/pages/get-started/direct-upload/

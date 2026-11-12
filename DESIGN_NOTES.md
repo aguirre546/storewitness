@@ -19,4 +19,5 @@ Sections reveal with a short fade and upward movement on entering the viewport. 
 
 ## Validation
 
-Browser checked text-only branding, system font stack, scroll progress and reveal activation; customer layout fits 390px without horizontal overflow. The animation page uses the same type and surface system while retaining its illustrated camera scene. Build and syntax checks passed. Existing hosting access remains blocked, so this refresh is available locally rather than verified publicly deployed.
+Browser checked text-only branding, system font stack, scroll progress and reveal activation; customer layout fits 390px without horizontal overflow. The animation page uses the same type and surface system while retaining its illustrated camera scene. Build and syntax checks passed. This refresh is now publicly deployed to https://studio.victoraguirre.site/ using Cloudflare Pages and D1; live checks are recorded in QA_REPORT.md.
+
