@@ -71,3 +71,11 @@ Validation: 60 scoped tests pass. API tests cover preset/custom duration boundar
 Each existing board retains its latest 200 metadata events in Cloudflare D1, independent of browser tabs. The customer timeline shows ten events initially with Show more and JSON Download history. Events use consistent labels, source, reason and full Philippine date/time. Break endings, override expiry, uncertain transitions and stale feeds are recorded. Expiry/stale events are materialized once on the next API read or write, with their actual effective timestamp; no always-on background worker is claimed. Earlier discarded entries cannot be recovered. History belongs to the Store ID; reconnect the same store to continue its timeline. Creating another board creates a separate history. Latest-200 retention is bounded, not an unlimited archive. No video is saved.
 
 63 scoped tests pass, including reopen-storage persistence, chronological/idempotent expiry, uncertainty transitions and 200-event retention.
+
+## Date archive and Camera evidence retest — 12 November 2026
+
+Recent activity now has Archive history by date, PHT calendar selection, saved-date event counts, Show all dates, cloud reload and per-date JSON downloads. The selected day survives refresh through the public URL. It browses retained D1 events; no events are moved/deleted and retention remains latest 200 per Store ID.
+
+Live checks: selected 2026-11-12 loaded 12 saved events; JSON export reported that date, Asia/Manila and 12 events without a pairing token. 2026-11-11 correctly showed zero events, disabled export, and remained selected after refresh. Existing storage and expiry tests remain 63 passing.
+
+Fresh Camera evidence tests: public models loaded; OPEN, CLOSE and CLOSED fixtures each read at 96% OCR quality with correct status normalization. Object sample detected 3 people and 3 kites (60–85% object scores), measured brightness 200/255, and correctly stayed Uncertain without a clear sign. A uniform dark image measured 5/255, no people/text, and stayed Uncertain. Webcam opened and analysis completed, but its default feed was near black (3/255); no real physical sign success or CCTV accuracy is claimed. Sending was not enabled and camera was stopped. Fixed model-ready text being replaced by OCR progress after loading.
