@@ -21,7 +21,7 @@ Image processing runs locally. Model downloads require internet and reveal the r
 
 Darkness, a quiet scene, or no detected people **does not prove closure**. Contradictory or insufficient evidence remains uncertain. Object classes are limited; this is not an all-object detector, a trained shutter detector, dual-camera fusion, or RTSP CCTV ingestion. Schedules are configured and saved on the operator device; they are not extracted from a photograph or centrally managed.
 
-The original operator camera mode also supports the supplied coded OPEN/CLOSED markers. That marker mode is separate from experimental OCR.
+Operator studio now defaults to ordinary OPEN / CLOSE / CLOSED sign OCR. Load text scanner once, enable the camera, and Start observing. Its image-test field uses the same sign reader without publishing. CLOSE and CLOSED both normalize to CLOSED. Optional supplied coded markers remain available through Detection mode. Object and schedule context remain on /inspect. Save your private pairing token before refreshing; it is held only in the current tab.
 
 ## Run and verify locally
 Requires Node.js 22.13+ with `node:sqlite` (tested on Node 26). There are no npm dependencies or paid API keys.

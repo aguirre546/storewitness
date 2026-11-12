@@ -5,7 +5,7 @@ Reviewed 12 November 2026. Creator: Victor Aguirre.
 Published, inspectable hackathon prototype: https://studio.victoraguirre.site/ . Cloudflare Pages serves the real application and D1 stores shared boards. Source is at https://github.com/aguirre546/storewitness . This is not a validated unattended two-camera CCTV service. Competition submission remains unsent.
 
 ## Completed checks and repairs
-- All 48 scoped automated tests pass: 22 raster marker detector, 13 confirmation/freshness state, 5 SQLite-backed API, and 8 schedule/evidence tests. These test counts exclude the older PurrFlow project.
+- All 51 scoped automated tests pass: 22 raster marker detector, 13 confirmation/freshness state, 5 SQLite-backed API, and 11 schedule/evidence tests. These test counts exclude the older PurrFlow project.
 - Fixed the screenshot's faint metric figures and view-navigation scroll position. Visually checked the live explanation page: title clears the sticky header and 10/3/35 metrics are readable. Text-only wordmark, system sans typography, scroll reveals and reduced-motion support retained.
 - Added `/inspect`: real COCO-SSD object/person inference, English sign OCR, brightness, weekdays/timezone and overnight hours. No model API key is required. Models download from public CDNs and inference runs locally.
 - Browser evidence: the controlled OPEN fixture read at 96% OCR quality with center crop. Whole-frame OCR initially missed the same sign. The controlled CLOSED fixture read at 96% on the public deployment and returned Closed. These confidence values describe the OCR output on individual fixtures, not storefront accuracy.
@@ -35,3 +35,11 @@ Published, inspectable hackathon prototype: https://studio.victoraguirre.site/ .
 `QA_REPORT.md` summarizes verification. Local `../StoreWitness_Live_QA.json` records sanitized live API results (no pairing token). TensorFlow COCO-SSD reference image came from https://raw.githubusercontent.com/tensorflow/tfjs-models/master/coco-ssd/demo/image1.jpg . TensorFlow's ES2017 CSP guidance: https://github.com/tensorflow/tfjs/issues/7554 .
 
 The deployable scope is useful for a transparent hackathon demonstration. Real-store reliability remains to be measured.
+
+
+## Ordinary-sign operator fix - 12 November 2026
+The reported failure was caused by the operator using a coded-marker-only detector while the user showed ordinary OPEN lettering. Step 2 now defaults to sign OCR, with explicit OPEN / CLOSE / CLOSED labels, a one-time Load text scanner control, center/whole-frame region selection, and a non-publishing image test. The optional coded-marker mode is clearly separated. Webcam capture preserves its actual aspect ratio, skips overlapping OCR work, and discards results that finish after stopping or reconnecting the camera.
+
+Added three semantic regression tests: CLOSE/CLOSED normalization, partial-word rejection (OPENING, REOPEN, CLOSEUP, ENCLOSED), and conflicting/low-confidence text. All 51 tests pass. In-browser operator image tests recognized OPEN, CLOSE and CLOSED; CLOSE mapped to CLOSED. Each controlled fixture returned 96% OCR quality. These are controlled image checks, not a measured physical-webcam accuracy study. The webcam-to-server path still requires a physical sign trial; the previous live API checks verify confirmation and freshness separately.
+
+Next operator actions: privately save Store ID and pairing token before refreshing; open the updated operator view, reconnect if required, keep Sign text selected, load the scanner, enable the correct camera, hold one clear word in the guide, and Start observing. Keep the tab active through three acknowledged observations. Test OPEN then CLOSE/CLOSED, conflicting signs, obstruction and stopping input. Slow inference may skip a scheduled tick. Objects, darkness and lack of people do not independently decide opening status.
