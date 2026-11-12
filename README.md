@@ -47,3 +47,15 @@ This is an inspectable hackathon prototype, not a claim of production accuracy, 
 - COCO-SSD supported detection: https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
 - Tesseract.js: https://github.com/naptha/tesseract.js
 - Cloudflare Direct Upload: https://developers.cloudflare.com/pages/get-started/direct-upload/
+
+
+## Webcam troubleshooting
+Camera testing no longer requires a paired store. Enable camera (the reader loads automatically), select the device showing your sign, and click **Check webcam frame · does not publish**. Whole frame is the default. Inspect the OCR preview, text, confidence, duration and preprocessing method. Mirrored feeds can be corrected with the explicit flip checkbox. Dim/unreadable images get bounded retries; uncertain results are retained rather than forced. Camera requests time out with guidance and can be retried. Test local recognition before pairing and starting public observations. Physical CLOSE recognition still requires a successful field test; controlled fixtures are not an accuracy benchmark.
+
+## Camera and Replay Lab usability update — 12 November 2026
+
+Start observing now performs first-use camera-board setup, camera access and text-scanner loading, with a persistent readiness message. A paired replay board requires an explicit switch to a camera board. Busy work and active observation still prevent duplicate starts.
+
+Replay Lab is always reachable from navigation. Its empty state explains that no recordings or camera are required, and provides Create a replay board. Replay scenarios remain labelled test data and separate from camera observations.
+
+Verification: 58 StoreWitness tests pass and the Worker builds. A physical webcam CLOSE reading remains unverified; controlled sign-image results do not prove field accuracy. Browser UI verification is recorded separately after deployment.
