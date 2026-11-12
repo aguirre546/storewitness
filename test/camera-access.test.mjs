@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {requestCamera} from '../src/camera-access.mjs';
+test('Camera request returns the delivered stream',async()=>{const stream={getTracks:()=>[]};assert.equal(await requestCamera({getUserMedia:async()=>stream},{video:true}),stream);});
+test('Unanswered camera request times out and stops a late stream',async()=>{let deliver,stopped=false;const p=requestCamera({getUserMedia:()=>new Promise(r=>deliver=r)},{video:true},{timeoutMs:5});await assert.rejects(p,/No camera frame/);deliver({getTracks:()=>[{stop:()=>stopped=true}]});await new Promise(r=>setTimeout(r,0));assert.equal(stopped,true);});
+test('Cancelled camera session rejects and releases tracks',async()=>{let stopped=false;await assert.rejects(requestCamera({getUserMedia:async()=>({getTracks:()=>[{stop:()=>stopped=true}]})},{video:true},{isCurrent:()=>false}),/cancelled/);assert.equal(stopped,true);});
