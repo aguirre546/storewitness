@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {readChoice,saveChoice,PRIVACY_KEY,HOURS_KEY,CHOICE_TTL} from '../src/privacy-choice.mjs';
+const store=()=>{const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)}};
+test('Optional storage is off before choice and after exact expiry',()=>{const s=store();assert.equal(readChoice(s,100),null);saveChoice(s,'accept',100);assert.equal(readChoice(s,101),'accept');assert.equal(readChoice(s,100+CHOICE_TTL),null);});
+test('Decline removes previously saved hours and can be changed later',()=>{const s=store();s.setItem(HOURS_KEY,'private schedule');saveChoice(s,'decline',100);assert.equal(s.getItem(HOURS_KEY),null);assert.equal(readChoice(s,101),'decline');saveChoice(s,'accept',102);assert.equal(readChoice(s,103),'accept');});
+test('Corrupt, unavailable and unexpectedly long-lived storage do not grant permission',()=>{assert.equal(readChoice(null),null);const s=store();s.setItem(PRIVACY_KEY,'bad JSON');assert.equal(readChoice(s),null);s.setItem(PRIVACY_KEY,JSON.stringify({choice:'accept',expiresAt:CHOICE_TTL+1000}));assert.equal(readChoice(s,1),null);assert.equal(saveChoice(null,'decline'),false);assert.throws(()=>saveChoice(s,'anything'));});
