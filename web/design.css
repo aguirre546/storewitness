@@ -19,3 +19,5 @@ footer{max-width:1180px;padding:25px 0 32px;font-size:10px;color:#8a939f;border-
 .metric-grid strong{color:#304158!important;opacity:1!important}.metric-grid strong span{color:#52627a!important}.page-intro{scroll-margin-top:110px}.view{padding-top:1px}.site-header{isolation:isolate}
 
 .sign-settings{margin:0 0 22px;padding:20px;border:1px solid #d9dee7;border-radius:14px;background:#f7f8fa}.sign-settings select,.sign-settings input{width:100%;margin-bottom:12px}.sign-settings p{font-size:13px;line-height:1.6;color:#43516a;overflow-wrap:anywhere}.sign-settings button{margin:8px 0}.camera-panel #detection-readout{overflow-wrap:anywhere}
+
+.mirror-control{display:flex;align-items:center;gap:8px}.sign-settings .mirror-control input{width:auto;margin:0}.camera-guide{inset:15%}.camera-frame video{object-fit:contain}
