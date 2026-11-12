@@ -79,3 +79,10 @@ Recent activity now has Archive history by date, PHT calendar selection, saved-d
 Live checks: selected 2026-11-12 loaded 12 saved events; JSON export reported that date, Asia/Manila and 12 events without a pairing token. 2026-11-11 correctly showed zero events, disabled export, and remained selected after refresh. Existing storage and expiry tests remain 63 passing.
 
 Fresh Camera evidence tests: public models loaded; OPEN, CLOSE and CLOSED fixtures each read at 96% OCR quality with correct status normalization. Object sample detected 3 people and 3 kites (60–85% object scores), measured brightness 200/255, and correctly stayed Uncertain without a clear sign. A uniform dark image measured 5/255, no people/text, and stayed Uncertain. Webcam opened and analysis completed, but its default feed was near black (3/255); no real physical sign success or CCTV accuracy is claimed. Sending was not enabled and camera was stopped. Fixed model-ready text being replaced by OCR progress after loading.
+
+
+## Terms, privacy and device choices
+
+Plain-language pages are available at `/terms`, `/privacy` and `/contact`. All pages include footer links and Manage cookies. Accept permits persistent device hours; Decline removes saved hours and keeps hours session-only. The choice is stored for 180 days. Core status/history and explicit camera/model actions do not depend on accepting optional storage. No email address is published; Contact Us uses GitHub public support and warns against sharing tokens or sensitive information. No secure private support channel is currently provided. The notice describes public metadata, local frame processing, third-party model downloads, Cloudflare hosting, bounded history and no automatic board expiry. Policies do not guarantee immunity from legal claims or replace review before a real-store deployment.
+
+Privacy-choice tests cover default off, exact expiry, withdrawal/removal of hours, invalid data and unavailable storage. All 66 scoped tests passed when this change was prepared.
