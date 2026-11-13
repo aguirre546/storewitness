@@ -12,7 +12,7 @@ A working community prototype that shares a participating store's latest observe
 2. Run OPEN replay. Three acknowledged observations ten seconds apart confirm the state after about twenty seconds.
 3. Copy the public status link and open it on another device. Public reads do not require the private pairing token.
 4. Stop observing. The signal becomes unavailable 35 seconds after the last observation.
-5. Test an owner override, which is labelled and expires after fifteen minutes.
+5. Test an owner override, which is labelled and expires after the selected duration (15 minutes by default).
 
 ## Real camera evidence
 Open `/inspect`, load models and choose an image or enable your webcam. TensorFlow.js COCO-SSD draws boxes for supported common objects, including people. Tesseract reads English OPEN/CLOSED text. Brightness and operator-entered timezone/hours add context. Select the center region for a close sign when whole-frame OCR misses it.
@@ -38,7 +38,7 @@ Visit http://127.0.0.1:4330 . For persistent local boards use `./Start-StoreWitn
 Run `node build-pages.mjs`. Upload the **contents** of `pages-deploy` (`_worker.js` and `index.html`) using Pages Direct Upload. Create a D1 database, execute `drizzle/0000_store_boards.sql`, and add the Pages binding named **DB**. Redeploy after setting the binding. Add a custom domain through Pages and verify its DNS record and HTTPS response. The live instance uses Cloudflare Pages and D1 on the free plan; free-plan limits still apply. Publishing source to GitHub does not automatically redeploy this Direct Upload project.
 
 ## Safeguards and limits
-Pairing tokens are returned only at creation, hashed in storage, excluded from public reads, and never placed in URLs. Keep the token privately; there is no account-based recovery in this prototype. Writes validate origin, source and input, enforce sample spacing, and use optimistic revision checks. Board creation is bounded. Only metadata and recent status history reach D1. A paired sender can submit false metadata; authentication does not prove that camera evidence is genuine.
+Pairing tokens are returned at creation or explicit rotation/recovery, hashed in storage, excluded from public reads, and never placed in URLs. Keep the token privately; recovery uses a separately saved single-use code rather than an owner account. Writes validate origin, source and input, enforce sample spacing, and use optimistic revision checks. Board creation is bounded. Only metadata and recent status history reach D1. A paired sender can submit false metadata; authentication does not prove that camera evidence is genuine.
 
 This is an inspectable hackathon prototype, not a claim of production accuracy, seven-day reliability, or guaranteed opening/service. No real CCTV deployment or Google Business Profile integration has been validated. Competition submission remains a separate action.
 
@@ -86,3 +86,14 @@ Fresh Camera evidence tests: public models loaded; OPEN, CLOSE and CLOSED fixtur
 Plain-language pages are available at `/terms`, `/privacy` and `/contact`. All pages include footer links and Manage cookies. Accept permits persistent device hours; Decline removes saved hours and keeps hours session-only. The choice is stored for 180 days. Core status/history and explicit camera/model actions do not depend on accepting optional storage. No email address is published; Contact Us uses GitHub public support and warns against sharing tokens or sensitive information. No secure private support channel is currently provided. The notice describes public metadata, local frame processing, third-party model downloads, Cloudflare hosting, bounded history and no automatic board expiry. Policies do not guarantee immunity from legal claims or replace review before a real-store deployment.
 
 Privacy-choice tests cover default off, exact expiry, withdrawal/removal of hours, invalid data and unavailable storage. All 66 scoped tests passed when this change was prepared.
+
+
+## Reliability release — 13 November 2026
+
+Camera writes require capturedAt (epoch milliseconds) and a unique observationId. Captures aged 35 seconds or more, excessive future timestamps, duplicate IDs and reordered captures are rejected. Public freshness preserves capture age, capped at receipt time. Existing open tabs must reload to use this API contract. Replay stays separate.
+
+Both camera pages share the sign reader. Evidence analysis is session-guarded, has model/inference timeouts, mirror correction and contrast retry, discards cancelled results, and aborts pending delivery when stopped. Stop cannot undo a request already accepted by the server. Selected Store ID links into /inspect, hours are stored per Store ID when optional storage is accepted, and copy/show controls are available there.
+
+The public page uses full PHT date/time and relative observation age, single-flight polling with retry backoff, response ordering, persistent errors and deep links through ?view=customer/operator/replay/about. Recovery controls let a connected owner replace the token and create a recovery code; using recovery replaces both credentials. Keep the downloaded private recovery file out of GitHub and support. Recovery is unavailable if neither current token nor a previously generated code is saved. Archive/restore is reversible, pauses store writes, and preserves retained history.
+
+Readiness checks execute a database query; oversized JSON bodies are rejected while streaming. Owner requests have a per-IP/store/minute bound. No database schema migration is required. 71 automated checks passed. Controlled browser image tests: OPEN 96%, CLOSE 96%, CLOSED 95% OCR confidence with correct status normalization; OPEN outside configured hours remained Uncertain. These are controlled fixture results, not field accuracy. CCTV feeds, always-on capture, private support, field testing and backup/restore drills remain separate work.
