@@ -1,3 +1,4 @@
+import {cleanLocations,distanceKm,eligibleAlternative} from './trip.mjs';
 import {captureAge} from './lifecycle.mjs';
 import {initialState,observe,publicStatus,setOverride,clearOverride,settleHistory,HISTORY_LIMIT} from './state.mjs';
 export const hash = async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -23,11 +24,12 @@ export async function api(request,db,now=Date.now()){
   await db.prepare('INSERT INTO boards(id,name,mode,token_hash,state,created_at) VALUES(?,?,?,?,?,?)').bind(id,name,data.mode,await hash(token),JSON.stringify(initialState(now)),now).run();
   return json({id,name,mode:data.mode,token},201);
  }
- const match=path.match(/^\/api\/boards\/([a-f0-9-]{36})(?:\/(observe|override|clear|pair|rotate|recover|archive))?$/);if(!match)return json({error:'Not found.'},404);
+ const match=path.match(/^\/api\/boards\/([a-f0-9-]{36})(?:\/(observe|override|clear|pair|rotate|recover|archive|locations|alternatives))?$/);if(!match)return json({error:'Not found.'},404);
  const row=await db.prepare('SELECT * FROM boards WHERE id=?').bind(match[1]).first();if(!row)return json({error:'Store not found.'},404);
  let state=JSON.parse(row.state);const settled=settleHistory(state,now);
  if(settled!==state){const saved=await db.prepare('UPDATE boards SET state=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(settled),row.id,row.revision).run();if(saved.meta.changes!==1)return json({error:'Another update arrived. Refresh and retry.'},409);state=settled;row.revision++;}
- const view=s=>({id:row.id,name:row.name,revision:row.revision,mode:row.mode,...publicStatus(s,now),...(s.archived?{status:'UNAVAILABLE',reason:'Owner archived this store. Observations paused.',candidate:null,count:0,override:undefined}:{}),archived:!!s.archived,history:s.history,historyLimit:HISTORY_LIMIT,serverTime:now});
+ const view=s=>({id:row.id,name:row.name,revision:row.revision,mode:row.mode,...publicStatus(s,now),...(s.archived?{status:'UNAVAILABLE',reason:'Owner archived this store. Observations paused.',candidate:null,count:0,override:undefined}:{}),archived:!!s.archived,location:s.location??null,history:s.history,historyLimit:HISTORY_LIMIT,serverTime:now});
+ if(request.method==='GET'&&match[2]==='alternatives'){const alternatives=[];for(const id of (state.location?.branches??[])){const other=await db.prepare('SELECT * FROM boards WHERE id=?').bind(id).first();if(!other)continue;const os=JSON.parse(other.state),d={id:other.id,name:other.name,mode:other.mode,...publicStatus(os,now),archived:!!os.archived,location:os.location??null};if(eligibleAlternative(d,now,row.mode))alternatives.push({...d,distanceKm:distanceKm(state.location,d.location)});}alternatives.sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity)||a.name.localeCompare(b.name));return json({alternatives,serverTime:now,basis:'Owner-linked participating locations; distance is straight-line from the selected store, not driving distance.'});}
  if(request.method==='GET'&&!match[2])return json(view(state));
  if(request.method!=='POST'||!match[2])return json({error:'Not found.'},404);
  const authBucket=await hash((request.headers.get('cf-connecting-ip')??'local')+':auth:'+row.id+':'+Math.floor(now/60000));const authRate=await db.prepare('INSERT INTO rate_limits(bucket,hits) VALUES(?,1) ON CONFLICT(bucket) DO UPDATE SET hits=hits+1 RETURNING hits').bind(authBucket).first();if(authRate.hits>60)return json({error:'Too many owner requests. Wait one minute.'},429);
@@ -35,6 +37,7 @@ export async function api(request,db,now=Date.now()){
  if(match[2]==='pair')return json({...view(state),archived:!!state.archived});
  if(['rotate','recover'].includes(match[2])){const newToken=crypto.randomUUID()+crypto.randomUUID(),recoveryCode=crypto.randomUUID()+crypto.randomUUID();const next={...state,recoveryHash:await hash(recoveryCode)};const saved=await db.prepare('UPDATE boards SET state=?,token_hash=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(next),await hash(newToken),row.id,row.revision).run();if(saved.meta.changes!==1)return json({error:'Another update arrived. Retry.'},409);return json({...view(next),token:newToken,recoveryCode});}
  if(match[2]==='archive'){if(typeof data.archived!=='boolean')return json({error:'Choose archive or restore.'},400);const next={...state,archived:data.archived};const saved=await db.prepare('UPDATE boards SET state=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(next),row.id,row.revision).run();if(saved.meta.changes!==1)return json({error:'Another update arrived. Retry.'},409);return json(view(next));}
+ if(match[2]==='locations'){let location;try{location=cleanLocations(data,row.id);}catch(e){return json({error:e.message},400);}const next={...state,location};const saved=await db.prepare('UPDATE boards SET state=?,revision=revision+1 WHERE id=? AND revision=?').bind(JSON.stringify(next),row.id,row.revision).run();if(saved.meta.changes!==1)return json({error:'Another update arrived. Retry.'},409);row.revision++;return json(view(next));}
  if(state.archived)return json({error:'Restore the archived store before changing it.'},409);
  let next;try{
   if(match[2]==='observe'){
