@@ -1,10 +1,12 @@
+import {bounded} from './lifecycle.mjs';
 import {assessEvidence} from './evidence.mjs';
 import {signConfidence,enhanceContrast} from './sign-quality.mjs';
 let workerPromise;
 export async function loadSignReader(){
  if(!workerPromise)workerPromise=(async()=>{
-  if(!window.Tesseract)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js';script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('OCR download failed. Check your connection and try again.'));};document.head.append(script);});
-  const worker=await window.Tesseract.createWorker('eng',1,{workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js',langPath:'https://tessdata.projectnaptha.com/4.0.0'});
+  if(!window.Tesseract)await bounded(new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js';script.onload=resolve;script.onerror=()=>{script.remove();reject(Error('OCR download failed. Check your connection and try again.'));};document.head.append(script);}),30000,'Text scanner download timed out. Retry loading.');
+  const pending=window.Tesseract.createWorker('eng',1,{workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/worker.min.js',langPath:'https://tessdata.projectnaptha.com/4.0.0'});
+  const worker=await bounded(pending,45000,'Text scanner initialization timed out.',()=>{pending.then(w=>w.terminate()).catch(()=>{});});
   await worker.setParameters({tessedit_pageseg_mode:'11'});return worker;
  })().catch(e=>{workerPromise=null;throw e;});
  return workerPromise;
