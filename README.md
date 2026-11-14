@@ -106,3 +106,13 @@ Customers can opt in to Watch this trip, a short sound and optional spoken alert
 Owners can save a public business address, optional coordinates and up to six alternative Store IDs. The public endpoint returns linked, fresh OPEN boards in the same camera/replay mode. Replay suggestions are labelled; brand affiliation is not independently verified. Distances are straight-line from the destination store, not the traveller. Google Maps directions open separately. No customer geolocation is requested. Suggestions expire and recheck. Availability on arrival is not guaranteed.
 
 75 automated tests pass, covering freshness, break attribution, stale/uncertain/archive rejection, location validation, same-mode alternatives, authenticated settings and public credential exclusion. Browser testing used isolated local replay boards to verify a closed alert, an open alternative and its directions link. These tests do not establish field CCTV accuracy or background phone delivery.
+
+
+## Establishment connector - 14 November 2026
+
+The new Python local app in `connector/` provides guided store pairing, USB/RTSP camera inputs, sign-region percentages, PHT hours, local OPEN/CLOSE/CLOSED OCR, bounded checks, optional Windows-encrypted setup and continuous metadata delivery while its process runs. Customer phones use the public website. Read [connector setup](connector/README.md) and `/establishment`. No physical CCTV compatibility or field accuracy is established by demo tests. See connector QA report for measured verification.
+
+
+## Separate owner and connector keys - 14 November 2026
+
+Each store owner can create or revoke one observation-only connector key in Private recovery and store management. It can pair and submit readings for that store, but cannot change settings, overrides, archive or credentials. Replacement, owner rotation and recovery revoke previous connector access. Owner keys remain supported for existing senders. Key possession does not verify business ownership or camera truth. Use the restricted connector key in the establishment app. 77 website tests and 9 connector tests pass. The maps and business-security roadmap is in MAPS_AND_BUSINESS_SECURITY_DRAFT.md; it is a draft, not feature parity or verified listing ownership.

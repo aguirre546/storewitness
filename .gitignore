@@ -4,3 +4,7 @@ dist/
 .openai/*.tar.gz
 *.log
 pages-deploy/
+connector/.venv/
+connector/private/
+connector/__pycache__/
+connector/models/
