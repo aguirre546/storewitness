@@ -8,7 +8,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from core import validate, decide, expected_open, PHT, save_config, load_config
-from app import Connector
+from app import Connector, api
+from urllib.error import URLError
 
 def config():
     return dict(origin='http://127.0.0.1:4330', store='11111111-1111-4111-8111-111111111111',
@@ -53,6 +54,18 @@ class CoreTests(unittest.TestCase):
             self.assertEqual(load_config(path),c)
 
 class RuntimeTests(unittest.TestCase):
+    def test_delivery_identifies_connector_and_network_errors_hide_private_details(self):
+        response=MagicMock();response.__enter__.return_value.read.return_value=b'{"status":"OPEN"}'
+        with patch('app.urlopen',return_value=response) as send:
+            self.assertEqual(api(config(),'pair',{})['status'],'OPEN')
+            request=send.call_args.args[0]
+            self.assertEqual(request.get_header('User-agent'),'StoreWitness-Connector/0.1')
+            self.assertNotIn(config()['token'],request.full_url)
+        with patch('app.urlopen',side_effect=URLError('private-camera-password')):
+            with self.assertRaises(ValueError) as error:
+                api(config(),'pair',{})
+            self.assertNotIn('private-camera-password',str(error.exception))
+
     @patch('app.SETTINGS',Path(tempfile.gettempdir())/'storewitness-nonexistent-test.dpapi')
     def test_mode_isolation_and_status_never_reveals_credentials(self):
         c=Connector()

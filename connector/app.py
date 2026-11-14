@@ -20,7 +20,8 @@ SETTINGS = ROOT / 'private' / 'setup.dpapi'
 def api(config, action, body):
     request = Request(config['origin'] + '/api/boards/' + config['store'] + '/' + action,
                       data=json.dumps(body).encode(), headers={'Content-Type': 'application/json',
-                      'Authorization': 'Bearer ' + config['token']}, method='POST')
+                      'Authorization': 'Bearer ' + config['token'],
+                      'User-Agent': 'StoreWitness-Connector/0.1', 'Accept': 'application/json'}, method='POST')
     try:
         with urlopen(request, timeout=8) as response:
             return json.loads(response.read(65536))
