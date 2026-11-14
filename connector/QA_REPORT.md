@@ -17,3 +17,7 @@ Implemented a local Python dashboard and bounded camera/OCR subprocess, one USB 
 Physical USB sign capture and actual IP camera/DVR/NVR streams need field testing. Proprietary camera clouds, ONVIF discovery, two-camera fusion, people/object detection, shutter classification, signed EXE installer, auto-start service, real-store accuracy and prolonged reliability are not delivered by this version. Keep the process and establishment computer running; closing the dashboard does not stop the app, but sleep/shutdown does. The connector does not run inside the customer's phone. Background phone alerts remain separate.
 
 Saved setup is opt-in DPAPI for the Windows login. There is no automatic monitoring on restart. Non-Windows persistence is disabled. One sender per Store ID. An already accepted request cannot be undone by Stop.
+
+## Scoped connector-key release
+
+77 website tests pass after adding observation-only device keys. Tests cover cross-store rejection, owner action denial, public secret exclusion, replacement/revocation, and revocation on owner rotation/recovery. Existing owner keys continue working; these keys do not independently verify a business claim.
