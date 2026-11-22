@@ -1,0 +1,31 @@
+import {absoluteTime} from './lifecycle.mjs';
+export function setupSnapshots({getPaired,video,request,onResult}){
+ const $=id=>document.getElementById(id);let prepared=null,signature='',expiry,board=null,previewUrl=null;
+ const note=text=>$('snapshot-message').textContent=text;
+ function clear(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=null;prepared=null;$('snapshot-preview').removeAttribute('src');$('snapshot-preview').hidden=true;$('snapshot-file').value='';$('snapshot-consent').checked=false;}
+ function render(data){
+  if(board!==data.id){clear();board=data.id;}
+  const rows=data.snapshots??[],key=JSON.stringify([data.id,data.status,rows]);if(key===signature)return;signature=key;clearTimeout(expiry);
+  const box=$('public-snapshots');box.replaceChildren();
+  $('snapshot-public-note').textContent=rows.length?'Owner-shared snapshots for this closure. Images support the report; they are not independently verified.':'No current outside or inside snapshot has been shared. Missing pictures do not prove that the store is open or closed.';
+  for(const row of rows){
+   const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
+   img.alt=(row.slot==='outside'?'Outside':'Inside')+' snapshot shared by the store owner';img.loading='lazy';img.src='/api/boards/'+data.id+'/evidence/'+row.slot+'?shared='+row.sharedAt;img.onerror=()=>{img.hidden=true;caption.textContent='This snapshot is no longer available. Refresh the store status.';};
+   caption.textContent=(row.slot==='outside'?'Outside':'Inside')+' · '+(row.source==='camera-frame'?'Owner camera snapshot':'Owner-uploaded CCTV snapshot')+' · Captured '+absoluteTime(row.capturedAt)+' · Shared '+absoluteTime(row.sharedAt)+' · Visible until '+absoluteTime(row.expiresAt)+(row.caption?' · '+row.caption:'');figure.append(img,caption);box.append(figure);
+  }
+  if(rows.length)expiry=setTimeout(()=>{box.replaceChildren();$('snapshot-public-note').textContent='These snapshots expired. Check the latest store status.';signature='';},Math.max(0,Math.min(...rows.map(r=>r.expiresAt-data.serverTime))));
+ }
+ async function prepare(source,kind){
+  const width=source.videoWidth||source.width,height=source.videoHeight||source.height;if(!width||!height)throw Error('No readable image. Enable your camera or select a picture.');
+  const canvas=document.createElement('canvas');const scale=Math.min(1,640/width,480/height);canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);
+  let encoded;for(const quality of [.65,.5,.35,.22]){encoded=canvas.toDataURL('image/jpeg',quality);if(encoded.length<=48000)break;}if(encoded.length>48000)throw Error('Picture is too detailed. Crop it to the doorway, sign or room and try again.');
+  prepared={dataUrl:encoded,source:kind};if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(new Blob([Uint8Array.from(atob(encoded.slice(23)),c=>c.charCodeAt(0))],{type:'image/jpeg'}));$('snapshot-preview').src=previewUrl;$('snapshot-preview').hidden=false;$('snapshot-consent').checked=false;note('Review this snapshot before sharing. Nothing has been uploaded.');
+ }
+ $('snapshot-file').onchange=async()=>{try{const file=$('snapshot-file').files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024)throw Error('Choose a JPEG, PNG or WebP picture under 10 MB.');const image=await createImageBitmap(file);try{await prepare(image,'cctv-upload');}finally{image.close();}$('snapshot-captured').value='';}catch(e){clear();note(e.message);}};
+ $('snapshot-capture').onclick=async()=>{try{if(!video.srcObject)throw Error('Enable your camera in step 2 first.');await prepare(video,'camera-frame');prepared.capturedAt=Date.now();$('snapshot-captured').value='';note('Current camera frame prepared. Choose Outside or Inside and review it. Nothing has been uploaded.');}catch(e){note(e.message);}};
+ $('snapshot-share').onclick=async()=>{const owner=getPaired();if(!owner)return note('Connect with your owner key first.');if(owner.mode!=='camera')return note('Replay boards cannot share real CCTV pictures.');if(!prepared)return note('Capture a frame or choose a CCTV picture first.');if(!$('snapshot-consent').checked)return note('Confirm that you have permission and the picture is safe to share publicly.');const capturedAt=prepared.capturedAt??new Date($('snapshot-captured').value).getTime();if(!Number.isFinite(capturedAt))return note('Enter when this CCTV frame was captured.');const payload={...prepared,capturedAt,slot:$('snapshot-slot').value,caption:$('snapshot-caption').value,consent:true};$('snapshot-share').disabled=true;try{const result=await request('/api/boards/'+owner.id+'/evidence',payload,true);if(getPaired()?.id!==owner.id)return;onResult(result);clear();note('Snapshot shared for this closure. It expires in 15 minutes.');}catch(e){note(e.message);}finally{$('snapshot-share').disabled=false;}};
+ $('snapshot-remove').onclick=async()=>{const owner=getPaired();if(!owner)return note('Connect with your owner key first.');try{const result=await request('/api/boards/'+owner.id+'/evidence',{remove:true,slot:$('snapshot-slot').value},true);if(getPaired()?.id!==owner.id)return;onResult(result);note('Selected snapshot removed.');}catch(e){note(e.message);}};
+ window.addEventListener('storewitness-status',e=>render(e.detail));
+ window.addEventListener('storewitness-offline',()=>{clearTimeout(expiry);signature='';$('public-snapshots').replaceChildren();$('snapshot-public-note').textContent='Connection lost. Current snapshots cannot be checked.';});
+ window.addEventListener('pagehide',()=>clearTimeout(expiry));
+}

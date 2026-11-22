@@ -1,3 +1,4 @@
+import {setupSnapshots} from './snapshot-ui.mjs';
 import './trip-ui.mjs';
 import {absoluteTime,storeTime} from './lifecycle.mjs';
 import {requestCamera} from './camera-access.mjs';
@@ -83,3 +84,5 @@ $('save-branches').onclick=async()=>{if(!paired)return message('Connect this sto
 
 for(const [id,action]of [['create-device-key','device-key'],['revoke-device-key','revoke-device']])$(id).onclick=async()=>{if(!paired)return $('device-key-message').textContent='Connect using the owner key first.';try{const data=await request('/api/boards/'+paired.id+'/'+action,{},true);$('device-key').value=data.deviceToken??'';$('device-key-message').textContent=data.deviceToken?'New connector key created. Save it privately; it cannot be retrieved later. Previous connector key revoked.':'Connector key revoked. Owner key is still active.';}catch(e){$('device-key-message').textContent=e.message;}};
 $('copy-device-key').onclick=async()=>{try{if(!$('device-key').value)throw Error('Create a connector key first.');await navigator.clipboard.writeText($('device-key').value);$('device-key-message').textContent='Connector key copied. Paste it into the local establishment app only.';}catch(e){$('device-key-message').textContent=e.message;}};
+
+setupSnapshots({getPaired:()=>paired,video:$('camera-video'),request,onResult:display});
