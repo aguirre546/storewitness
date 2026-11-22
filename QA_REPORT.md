@@ -79,3 +79,5 @@ Fresh Camera evidence tests: public models loaded; OPEN, CLOSE and CLOSED fixtur
 Browser QA also checked owner break and clear controls, saved history reload, recovery field reset, Camera evidence tiny-text safeguard, mobile header/control layout, and release dialog Escape/focus behavior. No console errors were observed on the tested pages.
 
 Remaining validation: actual storefront cameras at 10 m, day/night lighting, glare/angle/motion, hardware zoom/focus behavior, RTSP/DVR/NVR compatibility, physical phone vibration, and long unattended operation. Owner-shared images are not independently verified. No full commercial penetration test was performed.
+
+Post-deploy check found legacy CSS cached for four hours by the hosting edge. Stylesheet links now include this release version and new non-audio asset responses require revalidation. This prevents older CSS surviving an application deployment. Sign-image selection is also disabled while OCR models initialize.
