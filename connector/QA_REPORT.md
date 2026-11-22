@@ -21,3 +21,12 @@ Saved setup is opt-in DPAPI for the Windows login. There is no automatic monitor
 ## Scoped connector-key release
 
 77 website tests pass after adding observation-only device keys. Tests cover cross-store rejection, owner action denial, public secret exclusion, replacement/revocation, and revocation on owner rotation/recovery. Existing owner keys continue working; these keys do not independently verify a business claim.
+
+## Camera-resolution and OCR detail checks - 23 November 2026
+
+- The connector requests optional 3840 by 2160 USB capture and falls back to the original delivered mode if that mode cannot read a frame. Existing 4K sign-region pixels are retained; small selected regions enlarge at most 2x before OCR, with bounded OCR dimensions. RTSP continues using the owner's stream resolution.
+- Measured frame, crop and OCR dimensions plus a native OCR text-box height estimate and tips are returned to the local reading. No raw extracted text, frames or camera credentials are added. The existing delivery allowlist excludes quality metadata from public observations.
+- Sign boxes estimated below ten native pixels high cannot confirm OPEN/CLOSED. The estimate uses padded OCR boxes when available; it is not a measured physical letter size or a reliable-distance certificate.
+- **13 Python tests passed:** the original nine plus native 4K preservation, tight-region/upscale bounds, text-box scaling and sign-word filtering, tiny-text uncertainty without mutation, and a simulated unsupported-USB-resolution fallback with resource cleanup and credential exclusion.
+- Actual OpenCV/RapidOCR generated-fixture jobs after the change: OPEN -> OPEN; CLOSE -> CLOSED; CLOSED -> CLOSED; NONE -> UNCERTAIN. Four complete subprocesses took 2.89-4.36 seconds each in this run; OCR measured from capture took 520-827 milliseconds. No website observation was published by these tests. The 28-second job budget remains unchanged.
+- Physical USB/RTSP fallback, ten-metre reading, changing light, optical zoom and real-store reliability remain unverified. The new tests do not establish an accuracy percentage. Missing dependencies/models may require internet initially; local inference does not remove the website connection requirement for publication.

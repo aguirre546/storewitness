@@ -25,8 +25,16 @@ Local Python app for one participating store and one camera. Customers use the e
 - Same-LAN RTSP/RTSPS and webcam code paths are implemented. A physical USB camera and real DVR/NVR have not been validated by generated-sign tests. Never call synthetic test results a field accuracy rate.
 - Customer background/locked-screen alerts, route guidance inside another app and direct Google Maps listing updates are separate features.
 
+## Camera detail and distant signs - 23 November 2026
+
+USB capture now requests 3840 by 2160 pixels when supported. The camera may supply a lower mode; if the requested mode cannot return a frame, the connector retries its original mode. RTSP uses the resolution delivered by the owner's stream. Select a tight sign rectangle so the OCR model spends its detail budget on lettering rather than the whole street. Native 4K crops are retained; small crops can be enlarged up to two times locally. Extremely large OCR inputs are bounded to 4096 pixels per edge and about 8.8 million pixels.
+
+The local reading includes measured frame/crop/OCR dimensions, a native text-box height estimate when RapidOCR supplies a box, and practical advice. A detected sign box below ten original pixels high stays UNCERTAIN, even if enlarged text appears confident. This is a conservative low-detail guard, not a validated minimum readable letter size. OCR boxes can include padding. Enlarging missing pixels cannot recover real detail.
+
+Reading from ten metres has not been field-tested or guaranteed. Sign size, camera resolution, focus, lens/optical zoom, angle and lighting determine how many real pixels cover the letters. Test with the actual camera and sign at the intended distance during day and night, and leave unreadable/conflicting results uncertain. First-use package/model downloads require internet; inference runs locally after dependencies and models are available. Sending status to the live website still requires internet. New quality metadata stays in the local app's reading and is not sent with status observations.
+
 ## Development checks
 
-Run `.venv/Scripts/python.exe -m unittest discover -s . -p test_connector.py` from this folder. The website's `node --test` suite remains separate. To start without PowerShell, run `.venv/Scripts/python.exe app.py`. Bind address remains loopback; default port is 4332. The public website does not need Python installed on customers' phones.
+Run `.venv/Scripts/python.exe -m unittest discover -s . -p 'test_*.py'` from this folder. The website's `node --test` suite remains separate. To start without PowerShell, run `.venv/Scripts/python.exe app.py`. Bind address remains loopback; default port is 4332. The public website does not need Python installed on customers' phones.
 
 References: [OpenCV VideoCapture](https://docs.opencv.org/4.x/d8/dfe/classcv_1_1VideoCapture.html), [RapidOCR](https://github.com/RapidAI/RapidOCR), [RapidOCR usage](https://rapidai.github.io/RapidOCRDocs/latest/install_usage/rapidocr/usage/).
