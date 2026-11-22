@@ -1,0 +1,1 @@
+try{const c=localStorage.getItem('storewitness-appearance-v1');document.documentElement.dataset.theme=c==='dark'||c==='light'?c:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}catch{}
