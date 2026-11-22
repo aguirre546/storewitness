@@ -124,3 +124,15 @@ The customer trip alert uses the 10-second NDRRMC-labeled audio clip previewed a
 The approved Filipino Google Translate Taglish recording plays after the alarm. Vibration is requested only during alarm playback and is cancelled before speech, on Stop, preference changes and page exit. Voice-only does not vibrate. Hardware strength is controlled by the phone; browser support varies. English and simple Tagalog remain future drafts.
 
 Owners can manually prepare an outside or inside snapshot from the current browser camera, or upload a CCTV frame and enter its true capture time. Permission is required before public sharing. Pictures are resized and re-encoded locally as small JPEGs; private detail removal is the owner's responsibility. Camera boards only; connector keys cannot upload. Uploading does not change status. Public photo routes require the same current CLOSED/break period and hide images when status changes or is stale. Each slot expires 15 minutes after sharing; expired bytes are removed on next API access. Only two current images are stored in the existing board state, not in history. No schema migration, automatic dual-CCTV capture, independent image verification or fake demo scene is provided. See privacy policy for public-photo retention.
+
+
+## 23 November 2026 clarity and audit release
+
+- Preserved HD/4K source frames up to 3840 x 2160 instead of reducing all inputs to 1000 pixels wide. Hardware may supply a lower resolution.
+- Added movable target-sign region, highest-available/Full-HD capture choice, camera-provided zoom when supported, continuous focus when supported, and actual input resolution.
+- Local Tesseract.js OCR now serializes requests and retries contrast/adaptive threshold processing with time limits. Shows source pixels, selected-region size and source letter height. Native letters below 10 pixels cannot confirm a status; this heuristic is not a certified distance specification.
+- OPEN, CLOSE and CLOSED remain supported. Dim/empty scenes do not independently establish closure. A physical ten-metre range remains unverified. Initial model loading needs internet; this is not a fully installable offline website. The local Python connector uses OpenCV/RapidOCR and also needs its models downloaded first.
+- Added Light / Dark / System appearance, remembered on this device, and a dismissible product update with a What is new dialog. Improved task text/control readability on phones.
+- Fixed stale store responses, recovery-code leakage between store forms, stale API revision replies, snapshot decode/store-switch races and invalid JPEG headers.
+- Automated validation: 105 website tests and 9 Python connector tests passed. Browser OCR checks passed clear OPEN/CLOSE/CLOSED, dim CLOSE, corrected mirror, and small 4K sign; blank-dark/tiny text stayed uncertain. These are generated controlled examples, not a field accuracy benchmark.
+- No production store data, keys, domain ownership or database schema changed by this release.

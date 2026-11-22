@@ -63,3 +63,19 @@ Recent activity now has Archive history by date, PHT calendar selection, saved-d
 Live checks: selected 2026-11-12 loaded 12 saved events; JSON export reported that date, Asia/Manila and 12 events without a pairing token. 2026-11-11 correctly showed zero events, disabled export, and remained selected after refresh. Existing storage and expiry tests remain 63 passing.
 
 Fresh Camera evidence tests: public models loaded; OPEN, CLOSE and CLOSED fixtures each read at 96% OCR quality with correct status normalization. Object sample detected 3 people and 3 kites (60–85% object scores), measured brightness 200/255, and correctly stayed Uncertain without a clear sign. A uniform dark image measured 5/255, no people/text, and stayed Uncertain. Webcam opened and analysis completed, but its default feed was near black (3/255); no real physical sign success or CCTV accuracy is claimed. Sending was not enabled and camera was stopped. Fixed model-ready text being replaced by OCR progress after loading.
+
+
+## 23 November 2026 clarity and audit release
+
+- Preserved HD/4K source frames up to 3840 x 2160 instead of reducing all inputs to 1000 pixels wide. Hardware may supply a lower resolution.
+- Added movable target-sign region, highest-available/Full-HD capture choice, camera-provided zoom when supported, continuous focus when supported, and actual input resolution.
+- Local Tesseract.js OCR now serializes requests and retries contrast/adaptive threshold processing with time limits. Shows source pixels, selected-region size and source letter height. Native letters below 10 pixels cannot confirm a status; this heuristic is not a certified distance specification.
+- OPEN, CLOSE and CLOSED remain supported. Dim/empty scenes do not independently establish closure. A physical ten-metre range remains unverified. Initial model loading needs internet; this is not a fully installable offline website. The local Python connector uses OpenCV/RapidOCR and also needs its models downloaded first.
+- Added Light / Dark / System appearance, remembered on this device, and a dismissible product update with a What is new dialog. Improved task text/control readability on phones.
+- Fixed stale store responses, recovery-code leakage between store forms, stale API revision replies, snapshot decode/store-switch races and invalid JPEG headers.
+- Automated validation: 105 website tests and 9 Python connector tests passed. Browser OCR checks passed clear OPEN/CLOSE/CLOSED, dim CLOSE, corrected mirror, and small 4K sign; blank-dark/tiny text stayed uncertain. These are generated controlled examples, not a field accuracy benchmark.
+- No production store data, keys, domain ownership or database schema changed by this release.
+
+Browser QA also checked owner break and clear controls, saved history reload, recovery field reset, Camera evidence tiny-text safeguard, mobile header/control layout, and release dialog Escape/focus behavior. No console errors were observed on the tested pages.
+
+Remaining validation: actual storefront cameras at 10 m, day/night lighting, glare/angle/motion, hardware zoom/focus behavior, RTSP/DVR/NVR compatibility, physical phone vibration, and long unattended operation. Owner-shared images are not independently verified. No full commercial penetration test was performed.
